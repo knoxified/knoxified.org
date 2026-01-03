@@ -3,6 +3,12 @@
 
 <html lang="en" data-redirect-timezone="1">
 <head>
+  <script>
+  if (window.location.pathname === "/" || window.location.pathname === "") {
+    window.history.replaceState(null, "", "/");
+  }
+</script>
+
     <meta charset="utf-8">
     
     
