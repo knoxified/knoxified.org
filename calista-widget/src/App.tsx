@@ -1,24 +1,76 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Webchat, WebchatProvider } from "@botpress/webchat"
+
 import calistaAvatar from "./assets/calista.png"
+import amaraAvatar from "./assets/Amara.png"
+import noahAvatar from "./assets/Noah.png"
 
 const clientId = "f004f977-d4af-4da7-a5db-68ec3ecce7ca"
+
+const personas = {
+  calista: {
+    name: "Calista",
+    role: "AI Automation Strategist",
+    avatar: calistaAvatar,
+  },
+  amara: {
+    name: "Amara",
+    role: "Client Success Specialist",
+    avatar: amaraAvatar,
+  },
+  noah: {
+    name: "Noah",
+    role: "Systems Architect",
+    avatar: noahAvatar,
+  },
+}
+
+function getPersonaKey() {
+  const stored = sessionStorage.getItem("knoxified_persona")
+
+  if (stored && stored in personas) {
+    return stored as keyof typeof personas
+  }
+
+  const keys = Object.keys(personas) as Array<keyof typeof personas>
+  const randomKey = keys[Math.floor(Math.random() * keys.length)]
+
+  sessionStorage.setItem("knoxified_persona", randomKey)
+
+  return randomKey
+}
 
 export default function App() {
   const [open, setOpen] = useState(false)
   const [booting, setBooting] = useState(true)
+  const [showPersona, setShowPersona] = useState(false)
+  const [personaKey, setPersonaKey] = useState<keyof typeof personas>("calista")
+
+  useEffect(() => {
+    setPersonaKey(getPersonaKey())
+  }, [])
+
+  const persona = useMemo(() => personas[personaKey], [personaKey])
 
   useEffect(() => {
     if (!open) {
       setBooting(true)
+      setShowPersona(false)
       return
     }
 
-    const timer = window.setTimeout(() => {
+    const revealPersonaTimer = window.setTimeout(() => {
+      setShowPersona(true)
+    }, 3000)
+
+    const bootingTimer = window.setTimeout(() => {
       setBooting(false)
     }, 5000)
 
-    return () => window.clearTimeout(timer)
+    return () => {
+      window.clearTimeout(revealPersonaTimer)
+      window.clearTimeout(bootingTimer)
+    }
   }, [open])
 
   return (
@@ -116,18 +168,33 @@ export default function App() {
                     marginBottom: "18px",
                   }}
                 >
-                  <img
-                    src={calistaAvatar}
-                    alt="Calista"
-                    style={{
-                      width: "84px",
-                      height: "84px",
-                      borderRadius: "999px",
-                      objectFit: "cover",
-                      display: "block",
-                      boxShadow: "0 8px 25px rgba(37,99,235,0.18)",
-                    }}
-                  />
+                  {showPersona ? (
+                    <img
+                      src={persona.avatar}
+                      alt={persona.name}
+                      style={{
+                        width: "84px",
+                        height: "84px",
+                        borderRadius: "999px",
+                        objectFit: "cover",
+                        display: "block",
+                        boxShadow: "0 8px 25px rgba(37,99,235,0.18)",
+                      }}
+                    />
+                  ) : (
+                    <div
+                      aria-label="Connecting"
+                      style={{
+                        width: "84px",
+                        height: "84px",
+                        borderRadius: "999px",
+                        background: "#111111",
+                        display: "block",
+                        boxShadow: "0 8px 25px rgba(0,0,0,0.18)",
+                      }}
+                    />
+                  )}
+
                   <span
                     style={{
                       position: "absolute",
@@ -143,17 +210,42 @@ export default function App() {
                   />
                 </div>
 
-                <div
-                  style={{
-                    color: "#2563EB",
-                    fontSize: "15px",
-                    fontWeight: 600,
-                    marginBottom: "14px",
-                    textTransform: "lowercase",
-                  }}
-                >
-                  connecting you
-                </div>
+                {showPersona ? (
+                  <>
+                    <div
+                      style={{
+                        color: "#2563EB",
+                        fontSize: "16px",
+                        fontWeight: 600,
+                        marginBottom: "4px",
+                      }}
+                    >
+                      {persona.name}
+                    </div>
+
+                    <div
+                      style={{
+                        color: "#6B7280",
+                        fontSize: "13px",
+                        marginBottom: "14px",
+                      }}
+                    >
+                      {persona.role}
+                    </div>
+                  </>
+                ) : (
+                  <div
+                    style={{
+                      color: "#2563EB",
+                      fontSize: "15px",
+                      fontWeight: 600,
+                      marginBottom: "14px",
+                      textTransform: "lowercase",
+                    }}
+                  >
+                    connecting you
+                  </div>
+                )}
 
                 <div style={{ display: "flex", gap: "8px" }}>
                   <span className="calista-dot" />
@@ -201,8 +293,8 @@ export default function App() {
                 <Webchat
                   clientId={clientId}
                   configuration={{
-                    botName: "Calista",
-                    botAvatar: calistaAvatar,
+                    botName: persona.name,
+                    botAvatar: persona.avatar,
                     color: "#2563EB",
                   }}
                 />
