@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react"
 import { Webchat, WebchatProvider } from "@botpress/webchat"
 
 import calistaAvatar from "./assets/calista.png"
-import amaraAvatar from "./assets/Amara.png"
-import noahAvatar from "./assets/Noah.png"
+import amaraAvatar from "./assets/amara.png"
+import noahAvatar from "./assets/noah.png"
 
 const clientId = "f004f977-d4af-4da7-a5db-68ec3ecce7ca"
 
